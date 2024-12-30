@@ -1,0 +1,55 @@
+import CoolProp.CoolProp as CP
+import matplotlib.pyplot as plt
+#Defining the refrigerant and the evaporator and condenser temperatures in Kelvin
+R = ("R134a") #Tetrafluoroethane (CH2FCF3)
+T1 = -7 + 273.15 # Evaporator temperature(below freezing for effective cooling)
+t1 = []
+cop = []
+deltaT = 1
+#iterating the code for increment of the evaporator temperature by one degree
+while T1<7+273.15:
+T3 = 40 + 273.15 # Condenser temperature (higher than the ambient temperature)
+# Exit of the evaporator
+Q1 = 1 # Dryness factor (1 means saturated vapor)
+# Calculating properties at the exit of the evaporator
+P1 = CP.PropsSI('P', 'T', T1, 'Q', Q1, R)
+h1 = CP.PropsSI('H', 'T', T1, 'Q', Q1, R)
+S1 = CP.PropsSI('S', 'T', T1, 'Q', Q1, R)
+# Exit of the condenser
+Q3 = 0 #Saturated liquid
+# Calculating properties at the exit of the condenser
+P3 = CP.PropsSI('P', 'T', T3, 'Q', Q3, R)
+h3 = CP.PropsSI('H', 'T', T3, 'Q', Q3, R)
+S3 = CP.PropsSI('S', 'T', T3, 'Q', Q3, R)
+# At the exit of the compressor
+P2 = P3
+S2 = S1 #isentropicc process
+# Calculating the enthalpy at the exit of the compressor
+h2s = CP.PropsSI('H', 'S', S2, 'P', P2, R)
+# Defining the compressor efficiency of a household refrigerator
+eta = 0.55 # only about 50% to 60% of the electrical energy input is converted into useful work in the form of refrigeration.
+# Calculating the actual enthalpy at the exit of the compressor
+h2 = (h2s - h1) / eta + h1
+#print("Enthalpy at the exit of the compressor:", h2)
+# Inlet of the evaporator
+h4 = h3
+# Defining the evaporator heat transfer rate
+TR = 3.5 # (in kilowatts) 1 ton of refrigeration
+# Calculating the mass flow rate of the refrigerant
+massflorate = TR / (h1 - h4)
+# Calculating the work input to the compressor
+Win = massflorate * (h2 - h1)
+# Calculating the Coefficient of Performance (COP) of the refrigeration cycle
+COP = TR / Win
+cop.append(COP)
+t1.append(T1)
+T1 += deltaT
+print("Mass flow rate of the refrigerant:", massflorate)
+print("Work input to the compressor:", Win)
+print("Coefficient of Performance (COP):", COP)
+plt.plot(t1, cop)
+plt.xlabel('evaporator temperature in Kelvin')
+plt.ylabel('COP value')
+plt.title('Parameter analysis: COP vs Evaporator temperature')
+plt.grid(True)
+plt.show()
